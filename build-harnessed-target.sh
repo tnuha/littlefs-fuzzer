@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eu
 
 AFLCC=afl-clang-fast
 FLAGS=

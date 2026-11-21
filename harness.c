@@ -8,6 +8,10 @@
 
 #define BLOCK_SIZE 4096
 #define BLOCK_COUNT 128
+#define MAX_INPUT_SIZE (64 * 1024)
+#define MAX_OPS 96
+#define HANDLE_COUNT 4
+#define ORACLE_SIZE 8192
 
 static lfs_t lfs;
 static uint8_t storage[BLOCK_SIZE * BLOCK_COUNT];
@@ -34,24 +38,18 @@ static int user_provided_block_device_read(const struct lfs_config *cfg,
                                            lfs_block_t block, lfs_off_t off,
                                            void *buffer, lfs_size_t size) {
   if (block >= cfg->block_count || off > cfg->block_size ||
-      size > cfg->block_size - off) {
-    return LFS_ERR_IO;
-  }
-
+      size > cfg->block_size - off) return LFS_ERR_IO;
+  if (should_fail(FAULT_READ)) return LFS_ERR_IO;
   memcpy(buffer, storage + (size_t)block * cfg->block_size + off, size);
   return 0;
 }
 
 static int user_provided_block_device_prog(const struct lfs_config *cfg,
                                            lfs_block_t block, lfs_off_t off,
-                                           const void *buffer,
-                                           lfs_size_t size) {
+                                           const void *buffer, lfs_size_t size) {
   if (block >= cfg->block_count || off > cfg->block_size ||
-      size > cfg->block_size - off) {
-    return LFS_ERR_IO;
-  }
-
-  // Emulate flash programming: bits can change from 1 to 0.
+      size > cfg->block_size - off) return LFS_ERR_IO;
+  if (should_fail(FAULT_PROG)) return LFS_ERR_IO;
   uint8_t *dst = storage + (size_t)block * cfg->block_size + off;
   const uint8_t *src = buffer;
   if (should_power_cut()) {

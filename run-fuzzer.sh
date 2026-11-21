@@ -1,6 +1,8 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eu
 
 afl-fuzz -i ./input \
-  -o out2 \
-  ./harness @@
+  -o "out" \
+  -G 65536 \
+  ./harness
 
