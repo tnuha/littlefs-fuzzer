@@ -11,6 +11,9 @@
 static lfs_t lfs;
 static lfs_file_t file;
 static uint8_t storage[BLOCK_SIZE * BLOCK_COUNT];
+static uint8_t read_cache[16];
+static uint8_t prog_cache[16];
+static uint8_t lookahead[16];
 
 static int user_provided_block_device_read(const struct lfs_config *cfg,
                                            lfs_block_t block, lfs_off_t off,
@@ -70,6 +73,10 @@ static const struct lfs_config cfg = {
     .cache_size = 16,
     .lookahead_size = 16,
     .block_cycles = 500,
+
+    .read_buffer = read_cache,
+    .prog_buffer = prog_cache,
+    .lookahead_buffer = lookahead,
 };
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
@@ -123,7 +130,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (err)
     goto fail;
 
-  err = lfs_file_open(&lfs, &file, "message.txt",
+  err = lfs_file_open(&lfs, &file, data,
                       LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC);
   if (err)
     goto fail;
@@ -136,6 +143,23 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   err = lfs_file_close(&lfs, &file);
+  if (err)
+    goto fail;
+
+  err = lfs_remove(&lfs, data);
+  if (err)
+    goto fail;
+
+  err = lfs_rename(&lfs, data, "message.txt");
+  if (err)
+    goto fail;
+
+  err = lfs_rename(&lfs, "message.txt", data);
+  if (err)
+    goto fail;
+
+  struct lfs_info info;
+  err = lfs_stat(&lfs, data, &info);
   if (err)
     goto fail;
 
