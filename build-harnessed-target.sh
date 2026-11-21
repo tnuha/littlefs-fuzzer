@@ -1,13 +1,11 @@
 #!/bin/env bash
 
 AFLCC=afl-clang-fast
-AFLCXX=afl-clang-fast++
 FLAGS=
 export CFLAGS=$FLAGS
-export CXXFLAGS=$FLAGS
 
-$AFLCC -Wall -Weverything \
+$AFLCC -Wall -Wextra \
   ./*.c \
-  -fsanitize=fuzzer $FLAGS \
+  $FLAGS \
   -o ./harness
 
