@@ -7,7 +7,8 @@ currently at commit
 
 ## Building
 
-Building is done with `./build-harness.sh`,
+Build the AFL-instrumented target with `make build` (or
+`./build-harnessed-target.sh`),
 assuming a working `afl-clang-fast` install.
 If this isn't present, please follow [AFL++'s install instructions](<https://aflplus.plus/docs/install/>).
 
