@@ -8,6 +8,6 @@ export CXXFLAGS=$FLAGS
 
 $AFLCC -Wall -Weverything \
   ./*.c \
-  -fsanitize=fuzzer $FLAGS \
+  -fsanitize=fuzzer,address $FLAGS \
   -o ./harness
 
